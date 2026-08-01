@@ -5,6 +5,10 @@ const port = 3000;
 const taskList = [ {"id": 1, "title": "Start Capstone", "done": true}, 
     {"id": 2, "title": "Study java", "done": false},
     {"id": 3, "title": "Revise PHP", "done": false} ];
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./openapi.json');
+
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.get('/', (req, res) => {
   res.send({ 
