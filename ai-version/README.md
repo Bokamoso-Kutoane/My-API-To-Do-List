@@ -33,3 +33,9 @@ Interactive Swagger docs at `http://localhost:3000/api-docs`.
 | DELETE | /todos/:id   | Delete an item       | 200     | 404       |
 
 Data is stored in memory (a plain array), so it resets whenever the server restarts. Swap that array for a real database later — the route logic barely has to change.
+
+## Files
+
+- `index.js` — Express app: routes, in-memory data, server bootstrap.
+- `openapi.json` — the OpenAPI 3.0 spec (paths, schemas, response codes) that Swagger UI renders. Edit this file directly to change the docs; it's not generated from code comments.
+- `package.json` — dependencies (`express`, `swagger-ui-express`).
