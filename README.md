@@ -2,6 +2,9 @@
 
 A small API that manages a to-do list. Create tasks, read them, update them, delete them — the four CRUD operations, nothing more.
 
+<img width="1096" height="544" alt="image" src="https://github.com/user-attachments/assets/ae80673c-d372-4fe4-b62f-f0979c3e9022" />
+
+
 ## Stack
 
 - Node.js
