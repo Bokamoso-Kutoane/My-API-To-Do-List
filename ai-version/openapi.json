@@ -1,0 +1,142 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "To-Do List API",
+    "version": "1.0.0",
+    "description": "A minimal CRUD API for managing a to-do list."
+  },
+  "servers": [
+    { "url": "http://localhost:3000" }
+  ],
+  "tags": [
+    { "name": "Todos", "description": "To-do list operations" }
+  ],
+  "paths": {
+    "/todos": {
+      "get": {
+        "summary": "Get all to-do items",
+        "tags": ["Todos"],
+        "responses": {
+          "200": {
+            "description": "The full list of to-do items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Todo" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add a new to-do item",
+        "tags": ["Todos"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/NewTodo" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The newly created to-do item",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Todo" }
+              }
+            }
+          },
+          "400": { "description": "Missing required \"item\" field" }
+        }
+      }
+    },
+    "/todos/{id}": {
+      "get": {
+        "summary": "Get a single to-do item by id",
+        "tags": ["Todos"],
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "The matching to-do item",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Todo" }
+              }
+            }
+          },
+          "404": { "description": "No to-do item with that id" }
+        }
+      },
+      "put": {
+        "summary": "Edit an existing to-do item",
+        "tags": ["Todos"],
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/NewTodo" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated to-do item",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Todo" }
+              }
+            }
+          },
+          "404": { "description": "No to-do item with that id" }
+        }
+      },
+      "delete": {
+        "summary": "Delete a to-do item",
+        "tags": ["Todos"],
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "The deleted to-do item",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Todo" }
+              }
+            }
+          },
+          "404": { "description": "No to-do item with that id" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Todo": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "item": { "type": "string", "example": "Buy milk" },
+          "done": { "type": "boolean", "example": false }
+        }
+      },
+      "NewTodo": {
+        "type": "object",
+        "required": ["item"],
+        "properties": {
+          "item": { "type": "string", "example": "Buy milk" },
+          "done": { "type": "boolean", "example": false }
+        }
+      }
+    }
+  }
+}
