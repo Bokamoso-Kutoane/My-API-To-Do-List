@@ -1,4 +1,4 @@
-require('./db');
+const db = require('./db');
 const express = require('express');
 const app = express();
 app.use(express.json());
@@ -24,11 +24,12 @@ app.get('/health', (req, res) => {
 });
 
 app.get('/tasks', (req, res) => {
+    const taskList = db.prepare("SELECT * FROM tasks").all();
     res.send(taskList);
 });
 
 app.get('/tasks/:id', (req, res) => {
-    const foundTask = taskList.find(task => task.id === Number(req.params.id));
+    const foundTask = db.prepare("SELECT * FROM tasks WHERE id = ?").get(req.params.id);
     if (foundTask){
         res.send(foundTask);
     } else {
