@@ -52,7 +52,10 @@ app.post("/tasks", (req, res) => {
     };
 
     res.status(201).json(newTask);
-});
+}); 
+
+
+
 
 app.put("/tasks/:id", (req, res) => {
     const foundTask = db.prepare("SELECT * FROM tasks WHERE id = ?").get(req.params.id);
