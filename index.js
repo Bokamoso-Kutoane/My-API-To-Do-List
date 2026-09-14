@@ -36,7 +36,7 @@ app.get('/tasks', async (req, res) => {
         const tasks = await getAllTasks();
         res.send(tasks);
     } catch (err) {
-        res.status(500).json({ error: "Failed to fetch tasks" });
+        res.status(404).json({ error: "Task not found" });
     }
 });
 
