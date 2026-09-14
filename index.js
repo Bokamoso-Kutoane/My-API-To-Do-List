@@ -57,10 +57,9 @@ app.post("/tasks", async (req, res) => {
     if (req.body.title === undefined || req.body.title === "") {
         return res.status(400).json({ error: "Title is required" });
     }
-    
     try {
         const newTask = await addTask(req.body.title, req.body.done || false);
-        res.status(200).json(newTask);
+        res.status(201).json(newTask); // Changed to 201
     } catch (err) {
         res.status(500).json({ error: "Failed to add task" });
     }
@@ -68,14 +67,10 @@ app.post("/tasks", async (req, res) => {
 
 app.put("/tasks/:id", async (req, res) => {
     try {
-        // Find the task first to see if it exists and to get current values
         const foundTask = await getTaskById(req.params.id);
-
         if (!foundTask) {
-            return res.status(404).json({ error: `Task ${req.params.id} not found` });
+            return res.status(404).json({ error: "Task not found" }); // Fixed 404 string
         }
-
-        // Keep old values if new ones aren't provided
         const newTitle = req.body.title !== undefined ? req.body.title : foundTask.title;
         const newDone = req.body.done !== undefined ? req.body.done : foundTask.done;
 
@@ -89,17 +84,14 @@ app.put("/tasks/:id", async (req, res) => {
 app.delete("/tasks/:id", async (req, res) => {
     try {
         const deletedTask = await deleteTask(req.params.id);
-        
         if (!deletedTask) {
-            return res.status(404).json({ error: `Task ${req.params.id} not found` });
+            return res.status(404).json({ error: "Task not found" }); // Fixed 404 string
         }
-        
-        res.status(200).json({ message: "Task deleted" });
+        res.status(204).send(); // 204 requires an empty body, no JSON
     } catch (err) {
         res.status(500).json({ error: "Failed to delete task" });
     }
 });
-
 // --- SERVER START ---
 
 app.listen(port, () => {
