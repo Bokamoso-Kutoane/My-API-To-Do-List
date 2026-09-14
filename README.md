@@ -65,3 +65,21 @@ That's it. The database file and the `tasks` table are both created automaticall
 1. Build a small API that manages a to-do list, it must use Node.js, express and swaggerui. It must use all the CRUD operations, it must use Get, put, delete and post. You must be able to add a new item, you need to be able to edit it and delete it. There must be an id, the item and a done or not boolean. It must use code 200 for deleting and adding to the list, 404 for when the id is not found during editing, and it must have 5 endpoints.
 
 2. Forgot to mention, you can separate the code to index.js and openapi.json for swaggerui.
+
+## Database
+
+The task list originally lived in a plain JavaScript array, which was then upgraded to SQLite. It is now backed by a robust **PostgreSQL** database running in a Docker container.
+
+**How to start the database:**
+Make sure Docker is running, then execute this command to spin up the Postgres container with a persistent volume:
+
+```
+docker run --name taskdb -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=tasks -p 5432:5432 -v taskdata:/var/lib/postgresql -d postgres
+```
+
+**How to run the app:**
+
+```
+npm install
+node index.js
+```
