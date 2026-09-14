@@ -1,13 +1,19 @@
-const db = require('./db');
 const express = require('express');
 const app = express();
 app.use(express.json());
 const port = 3000;
-const taskList = [ {"id": 1, "title": "Start Capstone", "done": true}, 
-    {"id": 2, "title": "Study java", "done": false},
-    {"id": 3, "title": "Revise PHP", "done": false} ];
+
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./openapi.json');
+
+// Import your new Postgres database functions
+const { 
+    getAllTasks, 
+    getTaskById, 
+    addTask, 
+    updateTask, 
+    deleteTask 
+} = require('./db');
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
@@ -16,72 +22,87 @@ app.get('/', (req, res) => {
     "name": "Task API", 
     "version": "1.0", 
     "endpoints": ["/tasks"] 
-    });
+  });
 });
 
 app.get('/health', (req, res) => {
   res.send({"status": "ok"});
 });
 
-app.get('/tasks', (req, res) => {
-    const taskList = db.prepare("SELECT * FROM tasks").all();
-    res.send(taskList);
+// --- CRUD ROUTES ---
+
+app.get('/tasks', async (req, res) => {
+    try {
+        const tasks = await getAllTasks();
+        res.send(tasks);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch tasks" });
+    }
 });
 
-app.get('/tasks/:id', (req, res) => {
-    const foundTask = db.prepare("SELECT * FROM tasks WHERE id = ?").get(req.params.id);
-    if (foundTask){
-        res.send(foundTask);
-    } else {
-        res.status(404).json({error:`Task ${req.params.id} not found`});
-    };
+app.get('/tasks/:id', async (req, res) => {
+    try {
+        const foundTask = await getTaskById(req.params.id);
+        if (foundTask) {
+            res.send(foundTask);
+        } else {
+            res.status(404).json({ error: `Task ${req.params.id} not found` });
+        }
+    } catch (err) {
+        res.status(500).json({ error: "Database error" });
+    }
 });
 
-app.post("/tasks", (req, res) => {
+app.post("/tasks", async (req, res) => {
     if (req.body.title === undefined || req.body.title === "") {
         return res.status(400).json({ error: "Title is required" });
-    };
-
-    const result = db.prepare("INSERT INTO tasks (title, done) VALUES (?, ?)")
-                 .run(req.body.title, req.body.done ? 1 : 0);
-
-    const newTask = {
-        id: result.lastInsertRowid,
-        title: req.body.title,
-        done: req.body.done ?? false
-    };
-
-    res.status(201).json(newTask);
+    }
+    
+    try {
+        const newTask = await addTask(req.body.title, req.body.done || false);
+        res.status(200).json(newTask);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to add task" });
+    }
 }); 
 
+app.put("/tasks/:id", async (req, res) => {
+    try {
+        // Find the task first to see if it exists and to get current values
+        const foundTask = await getTaskById(req.params.id);
 
+        if (!foundTask) {
+            return res.status(404).json({ error: `Task ${req.params.id} not found` });
+        }
 
+        // Keep old values if new ones aren't provided
+        const newTitle = req.body.title !== undefined ? req.body.title : foundTask.title;
+        const newDone = req.body.done !== undefined ? req.body.done : foundTask.done;
 
-app.put("/tasks/:id", (req, res) => {
-    const foundTask = db.prepare("SELECT * FROM tasks WHERE id = ?").get(req.params.id);
-
-    if (!foundTask) {
-        return res.status(404).json({ error: `Task ${req.params.id} not found` });
+        const updatedTask = await updateTask(req.params.id, newTitle, newDone);
+        res.status(200).json(updatedTask);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to update task" });
     }
-
-    const newTitle = req.body.title !== undefined ? req.body.title : foundTask.title;
-    const newDone = req.body.done !== undefined ? (req.body.done ? 1 : 0) : foundTask.done;
-
-    db.prepare("UPDATE tasks SET title = ?, done = ? WHERE id = ?")
-      .run(newTitle, newDone, req.params.id);
-
-    res.status(200).json({ id: Number(req.params.id), title: newTitle, done: newDone });
 });
 
-app.delete("/tasks/:id", (req, res) => {
-    const result = db.prepare("DELETE FROM tasks WHERE id = ?").run(req.params.id);
-
-    if (result.changes === 0) {
-        return res.status(404).json({ error: `Task ${req.params.id} not found` });
+app.delete("/tasks/:id", async (req, res) => {
+    try {
+        const deletedTask = await deleteTask(req.params.id);
+        
+        if (!deletedTask) {
+            return res.status(404).json({ error: `Task ${req.params.id} not found` });
+        }
+        
+        res.status(200).json({ message: "Task deleted" });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to delete task" });
     }
-    return res.sendStatus(204);
 });
+
+// --- SERVER START ---
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+    console.log(`API running at http://localhost:${port}`);
+    console.log(`Swagger Docs available at http://localhost:${port}/docs`);
 });
