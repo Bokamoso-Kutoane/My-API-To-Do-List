@@ -36,7 +36,7 @@ app.get('/tasks', async (req, res) => {
         const tasks = await getAllTasks();
         res.send(tasks);
     } catch (err) {
-        res.status(404).json({ error: "Task not found" });
+        res.status(500).json({ error: "Failed to fetch tasks" });
     }
 });
 
@@ -46,7 +46,7 @@ app.get('/tasks/:id', async (req, res) => {
         if (foundTask) {
             res.send(foundTask);
         } else {
-            res.status(404).json({ error: `Task ${req.params.id} not found` });
+            res.status(404).json({ error: "Task not found" });
         }
     } catch (err) {
         res.status(500).json({ error: "Database error" });
